@@ -1,0 +1,82 @@
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<CalcService>();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapControllers();
+
+app.Run();
+
+public class CalcService
+{
+    public double Add(double a, double b)
+    {
+        return a + b;
+    }
+
+    public double Subtract(double a, double b)
+    {
+        return a - b;
+    }
+
+    public double Multiply(double a, double b)
+    {
+        return a * b;
+    }
+
+    public double Divide(double a, double b)
+    {
+        if (b == 0)
+            throw new ArgumentException("Division by zero is not allowed.");
+        return a / b;
+    }
+}
+
+[ApiController]
+[Route("api/[controller]")]
+public class CalcController : ControllerBase
+{
+    private readonly CalcService _calcService;
+
+    public CalcController(CalcService calcService)
+    {
+        _calcService = calcService;
+    }
+
+    [HttpGet("add")]
+    public IActionResult Add(double a, double b)
+    {
+        var result = _calcService.Add(a, b);
+        return Ok(result);
+    }
+
+    [HttpGet("subtract")]
+    public IActionResult Subtract(double a, double b)
+    {
+        var result = _calcService.Subtract(a, b);
+        return Ok(result);
+    }
+
+    [HttpGet("multiply")]
+    public IActionResult Multiply(double a, double b)
+    {
+        var result = _calcService.Multiply(a, b);
+        return Ok(result);
+    }
+
+    [HttpGet("divide")]
+    public IActionResult Divide(double a, double b)
+    {
+        try
+        {
+            var result = _calcService.Divide(a, b);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+}
