@@ -1,0 +1,54 @@
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddTransient<TimeAnalyzerService>();
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.MapControllers();
+
+app.Run();
+
+public class TimeAnalyzerService
+{
+    public string AnalyzeCurrentTime()
+    {
+        var currentTime = DateTime.Now.TimeOfDay;
+
+        if (currentTime >= TimeSpan.FromHours(12) && currentTime < TimeSpan.FromHours(18))
+        {
+            return "Зараз день";
+        }
+        else if (currentTime >= TimeSpan.FromHours(18) && currentTime < TimeSpan.FromHours(24))
+        {
+            return "Зараз вечір";
+        }
+        else if (currentTime >= TimeSpan.FromHours(0) && currentTime < TimeSpan.FromHours(6))
+        {
+            return "Зараз ніч";
+        }
+        else
+        {
+            return "Зараз ранок";
+        }
+    }
+}
+
+[ApiController]
+[Route("api/[controller]")]
+public class TimeController : ControllerBase
+{
+    private readonly TimeAnalyzerService _timeAnalyzerService;
+
+    public TimeController(TimeAnalyzerService timeAnalyzerService)
+    {
+        _timeAnalyzerService = timeAnalyzerService;
+    }
+
+    [HttpGet("current-time")]
+    public IActionResult GetCurrentTime()
+    {
+        var result = _timeAnalyzerService.AnalyzeCurrentTime();
+        return Ok(result);
+    }
+}
